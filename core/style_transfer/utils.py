@@ -63,4 +63,3 @@ def _conv_init_weights(net, out_channels: int, filter_size: int, transpose: bool
                                    stddev=.1,
                                    seed=1),
         dtype=tf.float32)
-    

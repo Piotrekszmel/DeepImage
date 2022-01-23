@@ -15,7 +15,7 @@ def net(image):
     preds = tf.nn.tanh(conv_t3) * 150 + 255./2
     return preds
 
-def Conv2D(data, num_filters: int, filter_size: int, strides: int, activation: bool =True):
+def Conv2D(data, num_filters: int, filter_size: int, strides: int, activation: bool=True):
     weights = _conv_init_weights(data, num_filters, filter_size)
     strides_shape = [1, strides, strides, 1]
     output = tf.nn.conv2d(data=data, filters=weights, strides=strides_shape, padding='SAME')

@@ -1,65 +1,123 @@
-import tensorflow as tf
+##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+## Created by: Hang Zhang
+## ECE Department, Rutgers University
+## Email: zhang.hang@rutgers.edu
+## Copyright (c) 2017
+##
+## This source code is licensed under the MIT-style license found in the
+## LICENSE file in the root directory of this source tree 
+##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def net(image):
-    conv1 = Conv2D(image, 32, 9, 1)
-    conv2 = Conv2D(conv1, 64, 3, 2)
-    conv3 = Conv2D(conv2, 128, 3, 2)
-    resid1 = ResidualBlock(conv3, 3)
-    resid2 = ResidualBlock(resid1, 3)
-    resid3 = ResidualBlock(resid2, 3)
-    resid4 = ResidualBlock(resid3, 3)
-    resid5 = ResidualBlock(resid4, 3)
-    conv_t1 = Conv2DTranspose(resid5, 64, 3, 2)
-    conv_t2 = Conv2DTranspose(conv_t1, 32, 3, 2)
-    conv_t3 = Conv2D(conv_t2, 3, 9, 1, relu=False)
-    preds = tf.nn.tanh(conv_t3) * 150 + 255./2
-    return preds
+import os
 
-def Conv2D(data, num_filters: int, filter_size: int, strides: int, activation: bool=True):
-    weights = _conv_init_weights(data, num_filters, filter_size)
-    strides_shape = [1, strides, strides, 1]
-    output = tf.nn.conv2d(data=data, filters=weights, strides=strides_shape, padding='SAME')
-    output = _normalize(output)
-    if activation:
-        return tf.nn.relu(output)
-    return output
+import numpy as np
+import torch
+from PIL import Image
+from torch.autograd import Variable
+from torchfile import load as load_lua
 
-def Conv2DTranspose(data, num_filters: int, filter_size: int, strides: int):
-    weights = _conv_init_weights(data, num_filters, filter_size, transpose=True)
+from net import Vgg16
 
-    batch_size, rows, cols = data.get_shape()[:3]
-    new_rows, new_cols = int(rows * strides), int(cols * strides)
+def tensor_load_rgbimage(filename, size=None, scale=None, keep_asp=False):
+    img = Image.open(filename).convert('RGB')
+    if size is not None:
+        if keep_asp:
+            size2 = int(size * 1.0 / img.size[0] * img.size[1])
+            img = img.resize((size, size2), Image.ANTIALIAS)
+        else:
+            img = img.resize((size, size), Image.ANTIALIAS)
 
-    new_shape = [batch_size, new_rows, new_cols, num_filters]
-    tf_shape = tf.stack(new_shape)
-    strides_shape = [1, strides, strides,1]
-    
-    output = tf.nn.conv2d_transpose(data, weights, tf_shape, strides_shape, padding='SAME')
-    output = _normalize(output)
-    return tf.nn.relu(output)
+    elif scale is not None:
+        img = img.resize((int(img.size[0] / scale), int(img.size[1] / scale)), Image.ANTIALIAS)
+    img = np.array(img).transpose(2, 0, 1)
+    return torch.from_numpy(img).float()
 
-def ResidualBlock(data, filter_size: int = 3):
-    conv2d = Conv2D(data, 128, filter_size, 1)
-    return data + Conv2D(conv2d, 128, filter_size, 1, relu=False)
 
-def _normalize(data):
-    channels = data.get_shape[-1]
-    mu, sigma_sq = tf.nn.moments(x=data, axes=[1,2], keepdims=True)
-    shift = tf.Variable(tf.zeros([channels]))
-    scale = tf.Variable(tf.ones([channels]))
-    epsilon = 1e-3
-    normalized = (data - mu) / (sigma_sq + epsilon)**(.5)
-    return scale * normalized + shift
-
-def _conv_init_weights(net, out_channels: int, filter_size: int, transpose: bool = False):
-    in_channels = net.get_shape()[-1]
-    if not transpose:
-        weights_shape = [filter_size, filter_size, in_channels, out_channels]
+def tensor_save_rgbimage(tensor, filename, cuda=False):
+    if cuda:
+        img = tensor.clone().cpu().clamp(0, 255).numpy()
     else:
-        weights_shape = [filter_size, filter_size, out_channels, in_channels]
+        img = tensor.clone().clamp(0, 255).numpy()
+    img = img.transpose(1, 2, 0).astype('uint8')
+    img = Image.fromarray(img)
+    img.save(filename)
 
-    return tf.Variable(
-        tf.random.truncated_normal(weights_shape,
-                                   stddev=.1,
-                                   seed=1),
-        dtype=tf.float32)
+
+def tensor_save_bgrimage(tensor, filename, cuda=False):
+    (b, g, r) = torch.chunk(tensor, 3)
+    tensor = torch.cat((r, g, b))
+    tensor_save_rgbimage(tensor, filename, cuda)
+
+
+def gram_matrix(y):
+    (b, ch, h, w) = y.size()
+    features = y.view(b, ch, w * h)
+    features_t = features.transpose(1, 2)
+    gram = features.bmm(features_t) / (ch * h * w)
+    return gram
+
+
+def subtract_imagenet_mean_batch(batch):
+    """Subtract ImageNet mean pixel-wise from a BGR image."""
+    tensortype = type(batch.data)
+    mean = tensortype(batch.data.size())
+    mean[:, 0, :, :] = 103.939
+    mean[:, 1, :, :] = 116.779
+    mean[:, 2, :, :] = 123.680
+    return batch - mean
+
+
+def add_imagenet_mean_batch(batch):
+    """Add ImageNet mean pixel-wise from a BGR image."""
+    tensortype = type(batch.data)
+    mean = tensortype(batch.data.size())
+    mean[:, 0, :, :] = 103.939
+    mean[:, 1, :, :] = 116.779
+    mean[:, 2, :, :] = 123.680
+    return batch + mean
+
+def imagenet_clamp_batch(batch, low, high):
+    batch[:,0,:,:].data.clamp_(low-103.939, high-103.939)
+    batch[:,1,:,:].data.clamp_(low-116.779, high-116.779)
+    batch[:,2,:,:].data.clamp_(low-123.680, high-123.680)
+
+
+def preprocess_batch(batch):
+    batch = batch.transpose(0, 1)
+    (r, g, b) = torch.chunk(batch, 3)
+    batch = torch.cat((b, g, r))
+    return batch.transpose(0, 1)
+
+
+def init_vgg16(model_folder):
+    """load the vgg16 model feature"""
+    if not os.path.exists(os.path.join(model_folder, 'vgg16.weight')):
+        if not os.path.exists(os.path.join(model_folder, 'vgg16.t7')):
+            os.system(
+                'wget http://cs.stanford.edu/people/jcjohns/fast-neural-style/models/vgg16.t7 -O ' + os.path.join(model_folder, 'vgg16.t7'))
+        vgglua = load_lua(os.path.join(model_folder, 'vgg16.t7'))
+        vgg = Vgg16()
+        for (src, dst) in zip(vgglua.parameters()[0], vgg.parameters()):
+            dst.data[:] = src
+        torch.save(vgg.state_dict(), os.path.join(model_folder, 'vgg16.weight'))
+
+
+class StyleLoader():
+    def __init__(self, style_folder, style_size, cuda=True):
+        self.folder = style_folder
+        self.style_size = style_size
+        self.files = os.listdir(style_folder)
+        self.cuda = cuda
+    
+    def get(self, i):
+        idx = i % len(self.files)
+        filepath = os.path.join(self.folder, self.files[idx])
+        style = tensor_load_rgbimage(filepath, self.style_size)    
+        style = style.unsqueeze(0)
+        style = preprocess_batch(style)
+        if self.cuda:
+            style = style.cuda()
+        return style
+
+    def size(self):
+        return len(self.files)

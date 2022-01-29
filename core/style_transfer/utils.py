@@ -9,14 +9,35 @@
 ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
-
+import cv2
 import numpy as np
 import torch
 from PIL import Image
-from torch.autograd import Variable
 from torchfile import load as load_lua
 
 from net import Vgg16
+
+def predict_image(img, style_loader, style_model, mirror, style_idx, cuda=False): 
+    if mirror: 
+        predicted_img = cv2.flip(img, 1)
+    predicted_img = np.array(predicted_img).transpose(2, 0, 1)
+
+    style = style_loader.get(style_idx)
+    style_model.setTarget(style)
+
+    predicted_img = torch.from_numpy(predicted_img).unsqueeze(0).float()
+    if cuda:
+        predicted_img = predicted_img.cuda()
+
+    predicted_img = style_model(predicted_img)
+
+    if cuda:
+        predicted_img = predicted_img.cpu().clamp(0, 255).detach().numpy()
+    else:
+        predicted_img = predicted_img.clamp(0, 255).detach().numpy()
+    predicted_img = predicted_img.squeeze().transpose(1, 2, 0).astype('uint8')
+    return predicted_img
+
 
 def tensor_load_rgbimage(filename, size=None, scale=None, keep_asp=False):
     img = Image.open(filename).convert('RGB')
@@ -53,8 +74,7 @@ def gram_matrix(y):
     (b, ch, h, w) = y.size()
     features = y.view(b, ch, w * h)
     features_t = features.transpose(1, 2)
-    gram = features.bmm(features_t) / (ch * h * w)
-    return gram
+    return features.bmm(features_t) / (ch * h * w)
 
 
 def subtract_imagenet_mean_batch(batch):

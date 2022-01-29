@@ -12,7 +12,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
 
 def var(x, dim=0):
     '''
@@ -24,7 +23,7 @@ def var(x, dim=0):
 
 class MultConst(nn.Module):
     def forward(self, input):
-        return 255*input
+        return 255 * input
 
 
 class GramMatrix(nn.Module):
@@ -32,25 +31,30 @@ class GramMatrix(nn.Module):
         (b, ch, h, w) = y.size()
         features = y.view(b, ch, w * h)
         features_t = features.transpose(1, 2)
-        gram = features.bmm(features_t) / (ch * h * w)
-        return gram
+        return features.bmm(features_t) / (ch * h * w)
     
 
 class Basicblock(nn.Module):
-    def __init__(self, inplanes, planes, stride=1, downsample=None, norm_layer=nn.BatchNorm2d):
+    def __init__(self, 
+                 inplanes,
+                 planes,
+                 stride=1,
+                 downsample=None,
+                 norm_layer=nn.BatchNorm2d):
         super(Basicblock, self).__init__()
         self.downsample = downsample
         if self.downsample is not None:
-            self.residual_layer = nn.Conv2d(inplanes, planes,
-                                                        kernel_size=1, stride=stride)
-        conv_block=[]
-        conv_block+=[norm_layer(inplanes),
-                                nn.ReLU(inplace=True),
-                                ConvLayer(inplanes, planes, kernel_size=3, stride=stride),
-                                norm_layer(planes),
-                                nn.ReLU(inplace=True),
-                                ConvLayer(planes, planes, kernel_size=3, stride=1),
-                                norm_layer(planes)]
+            self.residual_layer = nn.Conv2d(inplanes, 
+                                            planes,
+                                            kernel_size=1,
+                                            stride=stride)
+        conv_block = [norm_layer(inplanes),
+                      nn.ReLU(inplace=True),
+                      ConvLayer(inplanes, planes, kernel_size=3, stride=stride),
+                      norm_layer(planes),
+                      nn.ReLU(inplace=True),
+                      ConvLayer(planes, planes, kernel_size=3, stride=1),
+                      norm_layer(planes)]
         self.conv_block = nn.Sequential(*conv_block)
     
     def forward(self, input):
@@ -66,17 +70,20 @@ class UpBasicblock(nn.Module):
     Enables passing identity all the way through the generator
     ref https://arxiv.org/abs/1703.06953
     """
-    def __init__(self, inplanes, planes, stride=2, norm_layer=nn.BatchNorm2d):
+    def __init__(self, 
+                 inplanes,
+                 planes,
+                 stride=2,
+                 norm_layer=nn.BatchNorm2d):
         super(UpBasicblock, self).__init__()
         self.residual_layer = UpsampleConvLayer(inplanes, planes,
                                                       kernel_size=1, stride=1, upsample=stride)
-        conv_block=[]
-        conv_block+=[norm_layer(inplanes),
-                                nn.ReLU(inplace=True),
-                                UpsampleConvLayer(inplanes, planes, kernel_size=3, stride=1, upsample=stride),
-                                norm_layer(planes),
-                                nn.ReLU(inplace=True),
-                                ConvLayer(planes, planes, kernel_size=3, stride=1)]
+        conv_block = [norm_layer(inplanes),
+                      nn.ReLU(inplace=True),
+                      UpsampleConvLayer(inplanes, planes, kernel_size=3, stride=1, upsample=stride),
+                      norm_layer(planes),
+                      nn.ReLU(inplace=True),
+                      ConvLayer(planes, planes, kernel_size=3, stride=1)]
         self.conv_block = nn.Sequential(*conv_block)
     
     def forward(self, input):
@@ -95,16 +102,15 @@ class Bottleneck(nn.Module):
         if self.downsample is not None:
             self.residual_layer = nn.Conv2d(inplanes, planes * self.expansion,
                                                         kernel_size=1, stride=stride)
-        conv_block = []
-        conv_block += [norm_layer(inplanes),
-                                    nn.ReLU(inplace=True),
-                                    nn.Conv2d(inplanes, planes, kernel_size=1, stride=1)]
+        conv_block = [norm_layer(inplanes),
+                      nn.ReLU(inplace=True),
+                      nn.Conv2d(inplanes, planes, kernel_size=1, stride=1)]
         conv_block += [norm_layer(planes),
-                                    nn.ReLU(inplace=True),
-                                    ConvLayer(planes, planes, kernel_size=3, stride=stride)]
+                       nn.ReLU(inplace=True),
+                       ConvLayer(planes, planes, kernel_size=3, stride=stride)]
         conv_block += [norm_layer(planes),
-                                    nn.ReLU(inplace=True),
-                                    nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1)]
+                       nn.ReLU(inplace=True),
+                       nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1)]
         self.conv_block = nn.Sequential(*conv_block)
         
     def forward(self, x):
@@ -125,16 +131,15 @@ class UpBottleneck(nn.Module):
         self.expansion = 4
         self.residual_layer = UpsampleConvLayer(inplanes, planes * self.expansion,
                                                       kernel_size=1, stride=1, upsample=stride)
-        conv_block = []
-        conv_block += [norm_layer(inplanes),
-                                    nn.ReLU(inplace=True),
-                                    nn.Conv2d(inplanes, planes, kernel_size=1, stride=1)]
+        conv_block = [norm_layer(inplanes),
+                      nn.ReLU(inplace=True),
+                      nn.Conv2d(inplanes, planes, kernel_size=1, stride=1)]
         conv_block += [norm_layer(planes),
-                                    nn.ReLU(inplace=True),
-                                    UpsampleConvLayer(planes, planes, kernel_size=3, stride=1, upsample=stride)]
+                       nn.ReLU(inplace=True),
+                       UpsampleConvLayer(planes, planes, kernel_size=3, stride=1, upsample=stride)]
         conv_block += [norm_layer(planes),
-                                    nn.ReLU(inplace=True),
-                                    nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1)]
+                       nn.ReLU(inplace=True),
+                       nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1)]
         self.conv_block = nn.Sequential(*conv_block)
 
     def forward(self, x):
@@ -150,8 +155,7 @@ class ConvLayer(torch.nn.Module):
 
     def forward(self, x):
         out = self.reflection_pad(x)
-        out = self.conv2d(out)
-        return out
+        return self.conv2d(out)
 
 class UpsampleConvLayer(torch.nn.Module):
     """UpsampleConvLayer
@@ -175,8 +179,7 @@ class UpsampleConvLayer(torch.nn.Module):
             x = self.upsample_layer(x)
         if self.reflection_padding != 0:
             x = self.reflection_pad(x)
-        out = self.conv2d(x)
-        return out
+        return self.conv2d(x)
 
 
 class Inspiration(nn.Module):
@@ -189,7 +192,7 @@ class Inspiration(nn.Module):
         # B is equal to 1 or input mini_batch
         self.weight = nn.Parameter(torch.Tensor(1,C,C), requires_grad=True)
         # non-parameter buffer
-        self.G = Variable(torch.Tensor(B,C,C), requires_grad=True)
+        self.G = torch.Tensor(B,C,C, requires_grad=True)
         self.C = C
         self.reset_parameters()
 
@@ -278,7 +281,7 @@ class Net(nn.Module):
         model += [self.model1]
         model += [self.ins]    
 
-        for i in range(n_blocks):
+        for _ in range(n_blocks):
             model += [block(ngf*expansion, ngf, 1, None, norm_layer)]
         
         model += [upblock(ngf*expansion, 32, 2, norm_layer),

@@ -192,7 +192,8 @@ class Inspiration(nn.Module):
         # B is equal to 1 or input mini_batch
         self.weight = nn.Parameter(torch.Tensor(1,C,C), requires_grad=True)
         # non-parameter buffer
-        self.G = torch.Tensor(B,C,C, requires_grad=True)
+        self.G = torch.Tensor(B,C,C)
+        self.G.requires_grad = True
         self.C = C
         self.reset_parameters()
 

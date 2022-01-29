@@ -96,7 +96,7 @@ class Options():
 
         # demo
         demo_arg = subparsers.add_parser("demo", help="parser for evaluation/stylizing arguments")
-        demo_arg.add_argument("--style-folder", type=str, default="images/9styles/",
+        demo_arg.add_argument("--style-folder", type=str, default="images/21styles/",
                                 help="path to style-folder")
         demo_arg.add_argument("--style-size", type=int, default=512,
                                 help="size of style-image, default is the original size of style image")
@@ -110,6 +110,12 @@ class Options():
                                 help="number of generator filter channels, default 128")
         demo_arg.add_argument("--demo-size", type=int, default=480,
                                 help="demo window height, default 480")
+        demo_arg.add_argument("--content-image", type=str,
+                                help="path to content image you want to stylize")
+        demo_arg.add_argument("--content-size", type=int, default=512,
+                                help="factor for scaling down the content image")
+        demo_arg.add_argument("--style-idx", type=int, default=0,
+                                help="index of style-image")
 
     def parse(self):
         return self.parser.parse_args()

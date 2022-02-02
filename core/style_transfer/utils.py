@@ -14,28 +14,26 @@ import numpy as np
 import torch
 from PIL import Image
 
-from net import Vgg16
 
 def predict_image(img, style_loader, style_model, mirror, style_idx, cuda=False): 
     if mirror: 
-        predicted_img = cv2.flip(img, 1)
-    predicted_img = np.array(predicted_img).transpose(2, 0, 1)
+        img = cv2.flip(img, 1)
+    img = np.array(img).transpose(2, 0, 1)
 
     style = style_loader.get(style_idx)
     style_model.setTarget(style)
 
-    predicted_img = torch.from_numpy(predicted_img).unsqueeze(0).float()
+    img = torch.from_numpy(img).unsqueeze(0).float()
     if cuda:
-        predicted_img = predicted_img.cuda()
+        img = img.cuda()
 
-    predicted_img = style_model(predicted_img)
+    img = style_model(img)
 
     if cuda:
-        predicted_img = predicted_img.cpu().clamp(0, 255).detach().numpy()
+        img = img.cpu().clamp(0, 255).detach().numpy()
     else:
-        predicted_img = predicted_img.clamp(0, 255).detach().numpy()
-    predicted_img = predicted_img.squeeze().transpose(1, 2, 0).astype('uint8')
-    return predicted_img
+        img = img.clamp(0, 255).detach().numpy()
+    return img.squeeze().transpose(1, 2, 0).astype('uint8')
 
 
 def tensor_load_rgbimage(filename, size=None, scale=None, keep_asp=False):
@@ -108,7 +106,7 @@ def preprocess_batch(batch):
     return batch.transpose(0, 1)
 
 
-class StyleLoader():
+class StyleLoader:
     def __init__(self, style_folder, style_size, cuda=True):
         self.folder = style_folder
         self.style_size = style_size

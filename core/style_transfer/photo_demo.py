@@ -1,9 +1,10 @@
+from ast import arg
 import cv2
 import torch
 
-from net import Net
-from option import Options
-from utils import StyleLoader, predict_image
+from .net import Net
+from .option import Options
+from .utils import StyleLoader, predict_image
 
 def run_demo(args, mirror=False):
     style_model = Net(ngf=args.ngf)
@@ -61,7 +62,7 @@ def run_demo(args, mirror=False):
                 break
     img_name = "opencv_img_{}.png".format(args.style_idx)
     cv2.imwrite(img_name, pred_img)
-    cv2.imshow('MSG Demo', pred_img)
+    # cv2.imshow('MSG    Demo', pred_img)
     cv2.destroyAllWindows()
 
 def main():

@@ -1,6 +1,6 @@
 import argparse
 
-class Options():
+class Options:
     def __init__(self):
         self.parser = argparse.ArgumentParser(description="parser for PyTorch-Style-Transfer")
         subparsers = self.parser.add_subparsers(title="subcommands", dest="subcommand")
@@ -50,6 +50,5 @@ class Options():
                                 help="factor for scaling down the content image")
         demo_arg.add_argument("--style-idx", type=int, default=0,
                                 help="index of style-image")
-
     def parse(self):
         return self.parser.parse_args()

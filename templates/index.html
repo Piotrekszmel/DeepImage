@@ -53,7 +53,7 @@
       <div class="navbar-header pull-left">
         <a href="index.html" class="navbar-brand">
           <small>
-            Stylize
+            DeepImage
           </small>
         </a>
       </div>
@@ -128,7 +128,7 @@
 
               <div class="col-xs-8">
                 <h1>
-                  Foto
+                  UPLOAD IMAGE
                 </h1>
               </div><!-- /.col -->
 
@@ -158,7 +158,7 @@
 
               <div class="col-xs-8">
                 <h1>
-                  Estilo
+                  PICK A STYLE
                 </h1>
               </div><!-- /.col -->
 
@@ -175,27 +175,27 @@
                   <div class="col-xs-12">
                     <span class="profile-picture">
                       <img id="avatar1" onclick="setCheckpoint(1,'models/udnie.ckpt')" class="editable img-responsive editable-click editable-empty"
-                      alt="Alex's Avatar" src="{{ url_for('static', filename='images/avatars/udnie.jpg') }}" height="180px" width="200px">
+                      alt="Alex's Avatar" src="{{ url_for('static', filename='images/avatars/udnie.jpg') }}" height="120px" width="150px">
                     </span>
                     <span class="profile-picture">
                       <img id="avatar2" onclick="setCheckpoint(2,'models/la_muse.ckpt')" class="editable img-responsive editable-click editable-empty"
-                      alt="Alex's Avatar" src="{{ url_for('static', filename='images/avatars/la_muse.jpg') }}" height="180px" width="200px">
+                      alt="Alex's Avatar" src="{{ url_for('static', filename='images/avatars/la_muse.jpg') }}" height="120px" width="150px">
                     </span>
                     <span class="profile-picture">
                       <img id="avatar3" onclick="setCheckpoint(3,'models/rain_princess.ckpt')" class="editable img-responsive editable-click editable-empty"
-                      alt="Alex's Avatar" src="{{ url_for('static', filename='images/avatars/rain_princess.jpg') }}" height="180px" width="200px">
+                      alt="Alex's Avatar" src="{{ url_for('static', filename='images/avatars/rain_princess.jpg') }}" height="120px" width="150px">
                     </span>
                     <span class="profile-picture">
                       <img id="avatar4" onclick="setCheckpoint(4,'models/scream.ckpt')" class="editable img-responsive editable-click editable-empty"
-                      alt="Alex's Avatar" src="{{ url_for('static', filename='images/avatars/scream.jpg') }}" height="180px" width="200px">
+                      alt="Alex's Avatar" src="{{ url_for('static', filename='images/avatars/scream.jpg') }}" height="120px" width="150px">
                     </span>
                     <span class="profile-picture">
                       <img id="avatar5" onclick="setCheckpoint(5,'models/wave.ckpt')" class="editable img-responsive editable-click editable-empty"
-                      alt="Alex's Avatar" src="{{ url_for('static', filename='images/avatars/wave.jpg') }}" height="180px" width="200px">
+                      alt="Alex's Avatar" src="{{ url_for('static', filename='images/avatars/wave.jpg') }}" height="120px" width="150px">
                     </span>
                     <span class="profile-picture">
                       <img id="avatar6" onclick="setCheckpoint(6,'models/wreck.ckpt')" class="editable img-responsive editable-click editable-empty"
-                      alt="Alex's Avatar" src="{{ url_for('static', filename='images/avatars/wreck.jpg') }}" height="180px" width="200px">
+                      alt="Alex's Avatar" src="{{ url_for('static', filename='images/avatars/wreck.jpg') }}" height="120px" width="150px">
                     </span>
                     <input type="hidden" id="checkpoint" name="checkpoint" value="models/udnie.ckpt" />
                   </div>
@@ -209,12 +209,6 @@
             <div class="row">
               <div class="col-xs-2"></div>
 
-              <div class="col-xs-8">
-                <h1>
-                  Stylize
-                </h1>
-              </div><!-- /.col -->
-
               <div class="col-xs-2"></div>
             </div><!-- /.row -->
 
@@ -226,7 +220,7 @@
 
                 <div class="form-group">
                   <div class="col-xs-12">
-                    <input type="submit" value="Estilizar" class="btn btn-primary">
+                    <input type="submit" value="GENERATE" class="btn btn-primary">
                   </div>
                 </div>
 
@@ -240,36 +234,6 @@
         </div><!-- /.page-content -->
       </div>
     </div><!-- /.main-content -->
-
-    <div class="footer">
-      <div class="footer-inner">
-        <div class="footer-content">
-          <span class="bigger-120">
-            Alexandre Velloso &nbsp;
-            <span class="action-buttons">
-              <a href="https://github.com/AlexandreVelloso" target="_blank">
-                <i class="ace-icon fa fa-github-square red bigger-150"></i>
-              </a>
-            </span>
-
-            Caio Piantino &nbsp;
-            <span class="action-buttons">
-              <a href="https://github.com/skai2" target="_blank">
-                <i class="ace-icon fa fa-github-square green bigger-150"></i>
-              </a>
-            </span>
-
-            Daniel Terenzi &nbsp;
-            <span class="action-buttons">
-              <a href="#">
-                <i class="ace-icon fa fa-github-square blue bigger-150"></i>
-              </a>
-            </span>
-          </span>
-
-        </div>
-      </div>
-    </div>
 
   </div><!-- /.main-container -->
 
@@ -364,7 +328,7 @@
 
     $('#id-input-file-3').ace_file_input({
       style: 'well',
-      btn_choose: 'Clique aqui ou arraste imagens',
+      btn_choose: 'Click',
       btn_change: null,
       droppable: true,
       thumbnail: 'small',
@@ -387,7 +351,7 @@
     /////////
     $('#modal-form input[type=file]').ace_file_input({
       style: 'well',
-      btn_choose: 'Clique aqui ou arraste imagens',
+      btn_choose: 'Click',
       btn_change: null,
       droppable: true,
       thumbnail: 'large'

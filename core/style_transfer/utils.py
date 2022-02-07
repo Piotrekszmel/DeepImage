@@ -15,24 +15,15 @@ import torch
 from PIL import Image
 
 
-def predict_image(img, style_loader, style_model, mirror, style_idx, cuda=False): 
+def predict_image(img, style_loader, style_model, mirror, style_idx): 
     if mirror: 
         img = cv2.flip(img, 1)
     img = np.array(img).transpose(2, 0, 1)
-
     style = style_loader.get(style_idx)
     style_model.setTarget(style)
-
     img = torch.from_numpy(img).unsqueeze(0).float()
-    if cuda:
-        img = img.cuda()
-
     img = style_model(img)
-
-    if cuda:
-        img = img.cpu().clamp(0, 255).detach().numpy()
-    else:
-        img = img.clamp(0, 255).detach().numpy()
+    img = img.clamp(0, 255).detach().numpy()
     return img.squeeze().transpose(1, 2, 0).astype('uint8')
 
 
@@ -51,20 +42,17 @@ def tensor_load_rgbimage(filename, size=None, scale=None, keep_asp=False):
     return torch.from_numpy(img).float()
 
 
-def tensor_save_rgbimage(tensor, filename, cuda=False):
-    if cuda:
-        img = tensor.clone().cpu().clamp(0, 255).detach().numpy()
-    else:
-        img = tensor.clone().clamp(0, 255).detach().numpy()
+def tensor_save_rgbimage(tensor, filename):
+    img = tensor.clone().clamp(0, 255).detach().numpy()
     img = img.transpose(1, 2, 0).astype('uint8')
     img = Image.fromarray(img)
     img.save(filename)
 
 
-def tensor_save_bgrimage(tensor, filename, cuda=False):
+def tensor_save_bgrimage(tensor, filename):
     (b, g, r) = torch.chunk(tensor, 3)
     tensor = torch.cat((r, g, b))
-    tensor_save_rgbimage(tensor, filename, cuda)
+    tensor_save_rgbimage(tensor, filename)
 
 
 def gram_matrix(y):
@@ -107,21 +95,23 @@ def preprocess_batch(batch):
 
 
 class StyleLoader:
-    def __init__(self, style_folder, style_size, cuda=True):
+    def __init__(self, style_folder, style_size):
         self.folder = style_folder
         self.style_size = style_size
         self.files = os.listdir(style_folder)
-        self.cuda = cuda
+        print("\n\n\n\n\n")
+        print(self.files)
+        print("\n")
+
     
     def get(self, i):
+        if type(i) == str:
+            i = int(i)
         idx = i % len(self.files)
         filepath = os.path.join(self.folder, self.files[idx])
         style = tensor_load_rgbimage(filepath, self.style_size)    
         style = style.unsqueeze(0)
-        style = preprocess_batch(style)
-        if self.cuda:
-            style = style.cuda()
-        return style
+        return preprocess_batch(style)
 
     def size(self):
         return len(self.files)

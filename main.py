@@ -1,5 +1,4 @@
 import os
-import re
 from flask import Flask, request, redirect, url_for, send_from_directory, render_template
 
 from core.style_transfer.photo_demo import predict
@@ -23,16 +22,20 @@ def index():
         "style_size": 512,
         "demo_size": 480,
         "output_image": "output.jpg",
-        "content_image": "content.jpg",
+        #"content_image": "content.jpg",
         "mirror": False,
+        "if_download": 0
     }
      
     if request.method == "POST":
+        print("POST\n\n\n\n\n")
+        predict(args)
+        return redirect(url_for("output", filename=args["output_image"], if_download=args["if_download"]))
         if request.form.get("mirror"):
             args["mirror"] = True
+        if request.form.get("if_download"):
+            args["if_download"] = 1
         if request.form.get("resize"):
-            print("\n\n")
-            print(type(request.form))
             args["resize"] = True
             if request.form.get("new_height"):
                 args["new_height"] = int(request.form.get("new_height"))
@@ -42,17 +45,17 @@ def index():
             file = request.files["file"]
             if file.filename != "" and allowed_file(file.filename):
                 args["style_idx"] = request.form["checkpoint"]
-                file.save(os.path.join(app.config["UPLOAD_FOLDER"], args["content_image"]))
+                #file.save(os.path.join(app.config["UPLOAD_FOLDER"], args["content_image"]))
                 predict(args)
-                return redirect(url_for("output", filename=args["output_image"]))
+                return redirect(url_for("output", filename=args["output_image"], if_download=args["if_download"]))
         return redirect(request.url)
     
     return render_template("index.html")
 
-@app.route("/output/<filename>", methods=["GET"])
-def output(filename):
+@app.route("/output/<filename>/<if_download>", methods=["GET"])
+def output(filename, if_download):
     return send_from_directory(app.config["UPLOAD_FOLDER"],
-                               filename)
+                               filename, as_attachment=int(if_download))
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1")

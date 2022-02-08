@@ -99,10 +99,6 @@ class StyleLoader:
         self.folder = style_folder
         self.style_size = style_size
         self.files = os.listdir(style_folder)
-        print("\n\n\n\n\n")
-        print(self.files)
-        print("\n")
-
     
     def get(self, i):
         if type(i) == str:

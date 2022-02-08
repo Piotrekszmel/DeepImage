@@ -16,7 +16,7 @@ def predict(args):
     style_model.eval()
     style_loader = StyleLoader(args["style_folder"], args["style_size"])
 
-    if args["content_image"]:
+    if "content_image" in args:
         content_image = cv2.imread(args["content_image"])
         pred_img = predict_image(content_image,
                                  style_loader,
@@ -55,6 +55,6 @@ def predict(args):
     
     if ("resize" in args):
         if ("new_height" in args and "new_width" in args):
-            pred_img = cv2.resize(pred_img, (args["new_height"], args["new_width"]), interpolation = cv2.INTER_AREA)
+            pred_img = cv2.resize(pred_img, (args["new_width"], args["new_height"]), interpolation = cv2.INTER_AREA)
     cv2.imwrite(args["output_image"], pred_img)
     cv2.destroyAllWindows()

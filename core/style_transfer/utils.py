@@ -98,7 +98,7 @@ class StyleLoader:
     def __init__(self, style_folder, style_size):
         self.folder = style_folder
         self.style_size = style_size
-        self.files = os.listdir(style_folder)
+        self.files = sorted(os.listdir(style_folder), key=str.casefold)
     
     def get(self, i):
         if type(i) == str:

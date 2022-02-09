@@ -24,10 +24,13 @@ def index():
         #"content_image": "content.jpg",
         "output_image": "output.jpg",
         "mirror": False,
-        "if_download": 0
+        "if_download": 0,
+        "style_idx": 0
     }
      
     if request.method == "POST":
+        if request.form.get("checkpoint"):
+            args["style_idx"] = request.form["checkpoint"]
         if request.form.get("mirror"):
             args["mirror"] = True
         if request.form.get("if_download"):
@@ -41,8 +44,6 @@ def index():
         if "file" in request.files:
             args["content_image"] = "output.jpg"
             file = request.files["file"]
-            args["style_idx"] = request.form["checkpoint"]
-            
             if file.filename != "" and allowed_file(file.filename):
                 file.save(os.path.join(app.config["UPLOAD_FOLDER"], args["content_image"]))
                 predict(args)

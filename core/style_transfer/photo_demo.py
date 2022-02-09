@@ -27,7 +27,7 @@ def predict(args):
         height =  args["demo_size"]
         width = int(4.0 / 3 * args["demo_size"])
         cam = cv2.VideoCapture(0)
-        cv2.namedWindow("photo")
+        #cv2.namedWindow("photo")
         cam.set(3, width)
         cam.set(4, height)
         key = 0

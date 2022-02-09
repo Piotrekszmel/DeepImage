@@ -21,16 +21,13 @@ def index():
         "style_folder": "static/images/styles",
         "style_size": 512,
         "demo_size": 480,
-        "output_image": "output.jpg",
         #"content_image": "content.jpg",
+        "output_image": "output.jpg",
         "mirror": False,
         "if_download": 0
     }
      
     if request.method == "POST":
-        print("POST\n\n\n\n\n")
-        predict(args)
-        return redirect(url_for("output", filename=args["output_image"], if_download=args["if_download"]))
         if request.form.get("mirror"):
             args["mirror"] = True
         if request.form.get("if_download"):
@@ -42,12 +39,20 @@ def index():
             if request.form.get("new_width"):
                 args["new_width"] = int(request.form.get("new_width"))   
         if "file" in request.files:
+            args["content_image"] = "output.jpg"
             file = request.files["file"]
+            args["style_idx"] = request.form["checkpoint"]
+            
             if file.filename != "" and allowed_file(file.filename):
-                args["style_idx"] = request.form["checkpoint"]
-                #file.save(os.path.join(app.config["UPLOAD_FOLDER"], args["content_image"]))
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"], args["content_image"]))
                 predict(args)
                 return redirect(url_for("output", filename=args["output_image"], if_download=args["if_download"]))
+        if request.form.get("CAMERA"):
+            predict(args)
+            return redirect(url_for("output", filename=args["output_image"], if_download=args["if_download"]))
+
+
+
         return redirect(request.url)
     
     return render_template("index.html")

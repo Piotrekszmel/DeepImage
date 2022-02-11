@@ -1,11 +1,33 @@
 import os
+from core.style_transfer.net import Net
 import cv2
 import numpy as np
 import torch
 from PIL import Image
 
 
-def predict_image(img, style_loader, style_model, mirror, style_idx): 
+class StyleLoader:
+    def __init__(self, style_folder, style_size):
+        self.folder = style_folder
+        self.style_size = style_size
+        self.files = sorted(os.listdir(style_folder), key=str.casefold)
+    
+    def get(self, i):
+        idx = i % len(self.files)
+        filepath = os.path.join(self.folder, self.files[idx])
+        style = tensor_load_rgbimage(filepath, self.style_size)    
+        style = style.unsqueeze(0)
+        return preprocess_batch(style)
+
+    def size(self):
+        return len(self.files)
+
+
+def predict_image(img: np.ndarray,
+                  style_loader: StyleLoader,
+                  style_model: Net,
+                  mirror: bool,
+                  style_idx: int) -> np.ndarray: 
     if mirror: 
         img = cv2.flip(img, 1)
     img = np.array(img).transpose(2, 0, 1)
@@ -17,7 +39,10 @@ def predict_image(img, style_loader, style_model, mirror, style_idx):
     return img.squeeze().transpose(1, 2, 0).astype('uint8')
 
 
-def tensor_load_rgbimage(filename, size=None, scale=None, keep_asp=False):
+def tensor_load_rgbimage(filename: str,
+                         size: int = None,
+                         scale: int = None,
+                         keep_asp: bool = False) -> torch.Tensor:
     img = Image.open(filename).convert('RGB')
     if size is not None:
         if keep_asp:
@@ -32,72 +57,8 @@ def tensor_load_rgbimage(filename, size=None, scale=None, keep_asp=False):
     return torch.from_numpy(img).float()
 
 
-def tensor_save_rgbimage(tensor, filename):
-    img = tensor.clone().clamp(0, 255).detach().numpy()
-    img = img.transpose(1, 2, 0).astype('uint8')
-    img = Image.fromarray(img)
-    img.save(filename)
-
-
-def tensor_save_bgrimage(tensor, filename):
-    (b, g, r) = torch.chunk(tensor, 3)
-    tensor = torch.cat((r, g, b))
-    tensor_save_rgbimage(tensor, filename)
-
-
-def gram_matrix(y):
-    (b, ch, h, w) = y.size()
-    features = y.view(b, ch, w * h)
-    features_t = features.transpose(1, 2)
-    return features.bmm(features_t) / (ch * h * w)
-
-
-def subtract_imagenet_mean_batch(batch):
-    """Subtract ImageNet mean pixel-wise from a BGR image."""
-    tensortype = type(batch.data)
-    mean = tensortype(batch.data.size())
-    mean[:, 0, :, :] = 103.939
-    mean[:, 1, :, :] = 116.779
-    mean[:, 2, :, :] = 123.680
-    return batch - mean
-
-
-def add_imagenet_mean_batch(batch):
-    """Add ImageNet mean pixel-wise from a BGR image."""
-    tensortype = type(batch.data)
-    mean = tensortype(batch.data.size())
-    mean[:, 0, :, :] = 103.939
-    mean[:, 1, :, :] = 116.779
-    mean[:, 2, :, :] = 123.680
-    return batch + mean
-
-def imagenet_clamp_batch(batch, low, high):
-    batch[:,0,:,:].data.clamp_(low-103.939, high-103.939)
-    batch[:,1,:,:].data.clamp_(low-116.779, high-116.779)
-    batch[:,2,:,:].data.clamp_(low-123.680, high-123.680)
-
-
-def preprocess_batch(batch):
+def preprocess_batch(batch: torch.Tensor) -> torch.Tensor:
     batch = batch.transpose(0, 1)
     (r, g, b) = torch.chunk(batch, 3)
     batch = torch.cat((b, g, r))
     return batch.transpose(0, 1)
-
-
-class StyleLoader:
-    def __init__(self, style_folder, style_size):
-        self.folder = style_folder
-        self.style_size = style_size
-        self.files = sorted(os.listdir(style_folder), key=str.casefold)
-    
-    def get(self, i):
-        if type(i) == str:
-            i = int(i)
-        idx = i % len(self.files)
-        filepath = os.path.join(self.folder, self.files[idx])
-        style = tensor_load_rgbimage(filepath, self.style_size)    
-        style = style.unsqueeze(0)
-        return preprocess_batch(style)
-
-    def size(self):
-        return len(self.files)

@@ -23,8 +23,8 @@ def predict(Config: dict) -> None:
                                 style_model,
                                 Config["mirror"],
                                 Config["style_idx"])  
-    if ("resize" in Config):
-        if ("new_height" in Config and "new_width" in Config):
+    if "resize" in Config:
+        if "new_height" in Config and "new_width" in Config:
             pred_img = cv2.resize(pred_img, (Config["new_width"], Config["new_height"]), interpolation = cv2.INTER_AREA)
     cv2.imwrite(Config["output_image"], pred_img)
     cv2.destroyAllWindows()

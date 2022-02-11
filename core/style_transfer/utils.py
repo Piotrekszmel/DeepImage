@@ -7,19 +7,19 @@ from PIL import Image
 
 
 class StyleLoader:
-    def __init__(self, style_folder, style_size):
+    def __init__(self, style_folder: str, style_size: int) -> None:
         self.folder = style_folder
         self.style_size = style_size
         self.files = sorted(os.listdir(style_folder), key=str.casefold)
     
-    def get(self, i):
+    def get(self, i: int) -> torch.Tensor:
         idx = i % len(self.files)
         filepath = os.path.join(self.folder, self.files[idx])
         style = tensor_load_rgbimage(filepath, self.style_size)    
         style = style.unsqueeze(0)
         return preprocess_batch(style)
 
-    def size(self):
+    def size(self) -> int:
         return len(self.files)
 
 

@@ -63,4 +63,4 @@ def output(filename: str, if_download: str):
                                filename, as_attachment=int(if_download))
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", debug=False, use_reloader=False)
+    app.run(debug=True, host='0.0.0.0')

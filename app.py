@@ -1,21 +1,21 @@
 from flask import Flask, request, redirect, url_for, send_from_directory, render_template
 import os
 
-from core.style_transfer.photo_demo import predict, make_photo
+from deepimage.core.style_transfer.photo_demo import predict, make_photo
 
-UPLOAD_FOLDER = "./"
+UPLOAD_FOLDER = "./deepimage"
 
 
 def allowed_file(filename: str):
     return "." in filename and \
            filename.rsplit(".", 1)[1].lower() in ["jpg", "jpeg"]
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="deepimage/templates", static_folder="deepimage/static")
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 Config = {
-    "model": "core/style_transfer/models/21styles.model",
-    "style_folder": "static/images/styles",
+    "model": "deepimage/core/style_transfer/models/21styles.model",
+    "style_folder": "deepimage/static/images/styles",
     "style_size": 512,
     "demo_size": 480,
     "output_image": "output.jpg",
@@ -26,6 +26,7 @@ Config = {
     "content_image": "content.jpg",
     "save_path": os.path.join(app.config["UPLOAD_FOLDER"], "content.jpg")
 }
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -57,10 +58,12 @@ def index():
     
     return render_template("index.html")
 
+
 @app.route("/output/<filename>/<if_download>", methods=["GET"])
 def output(filename: str, if_download: str):
     return send_from_directory(app.config["UPLOAD_FOLDER"],
                                filename, as_attachment=int(if_download))
+
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')

@@ -41,7 +41,7 @@ Clone the repo, build the app and run it on the 0.0.0.0:5000 port.
 
 ### FLOW
 
-1. Upload an image or make a photo with webcam.
+1. Upload an image or make a photo with a webcam.
 
 2. Set up the configuration
 

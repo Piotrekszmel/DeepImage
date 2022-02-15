@@ -46,6 +46,7 @@ def index():
         if "file" in request.files:
             file = request.files["file"]
             if file.filename != "" and allowed_file(file.filename):
+                open(Config["save_path"], "w+").close()
                 file.save(Config["save_path"])
                 predict(Config)
                 return redirect(url_for("output", filename=Config["output_image"], if_download=Config["if_download"]))

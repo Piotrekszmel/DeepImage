@@ -37,7 +37,7 @@ Clone the repo, build the app and run it on the 0.0.0.0:5000 port.
 
 ### APP
 
-<img src ="images/input1.jpg" width="600px" />
+<img src ="images/app.jpg" width="700px" />
 
 ### Examples
 

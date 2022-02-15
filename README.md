@@ -27,7 +27,7 @@ Clone the repo, build the app and run it on the 0.0.0.0:5000 port.
     python3 main.py
     ```
 
-### Second way
+### Second way (Docker)
 
 1. Run the script that will start the docker container
 
@@ -47,7 +47,7 @@ Clone the repo, build the app and run it on the 0.0.0.0:5000 port.
 
 3. Pick a style
 
-4. Generate
+4. Generate styled image
 
 ### Examples
 

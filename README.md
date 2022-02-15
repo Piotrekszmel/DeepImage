@@ -2,7 +2,7 @@
 
 Deep Learning Image transformation API. For now only neural style transfer is implemented. It's using pre-trained model.
 
-### Stylize Images Using Pre-trained Multi-Style Generative Network
+## Stylize Images Using Pre-trained Multi-Style Generative Network
 
 Clone the repo, build the app and run it on the 0.0.0.0:5000 port.
 
@@ -13,7 +13,7 @@ Clone the repo, build the app and run it on the 0.0.0.0:5000 port.
     cd DeepImage
     ```
 
-## First way
+### First way
 
 1. Download the pre-trained model
 
@@ -27,7 +27,7 @@ Clone the repo, build the app and run it on the 0.0.0.0:5000 port.
     python3 main.py
     ```
 
-## Second way
+### Second way
 
 1. Run the script that will start the docker container
 
@@ -35,11 +35,11 @@ Clone the repo, build the app and run it on the 0.0.0.0:5000 port.
     bash start.sh
     ```
 
-### APP
+## APP
 
 <img src ="images/app.jpg" width="700px" />
 
-## FLOW
+### FLOW
 
 1. Upload an image or make a photo with webcam.
 

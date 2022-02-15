@@ -4,7 +4,7 @@ Deep Learning Image transformation API. For now only neural style transfer is im
 
 ### Stylize Images Using Pre-trained Multi-Style Generative Network
 
-Build the app and run it on the 0.0.0.0:5000 port.
+Clone the repo, build the app and run it on the 0.0.0.0:5000 port.
 
 0. Clone the repo
 

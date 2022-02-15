@@ -3,7 +3,7 @@ import os
 
 from deepimage.core.style_transfer.photo_demo import predict, make_photo
 
-UPLOAD_FOLDER = "./deepimage"
+UPLOAD_FOLDER = "./"
 
 
 def allowed_file(filename: str):

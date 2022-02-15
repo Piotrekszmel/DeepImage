@@ -36,14 +36,14 @@ def predict_image(img: np.ndarray,
     img = torch.from_numpy(img).unsqueeze(0).float()
     img = style_model(img)
     img = img.clamp(0, 255).detach().numpy()
-    return img.squeeze().transpose(1, 2, 0).astype('uint8')
+    return img.squeeze().transpose(1, 2, 0).astype("uint8")
 
 
 def tensor_load_rgbimage(filename: str,
                          size: int = None,
                          scale: int = None,
                          keep_asp: bool = False) -> torch.Tensor:
-    img = Image.open(filename).convert('RGB')
+    img = Image.open(filename).convert("RGB")
     if size is not None:
         if keep_asp:
             size2 = int(size * 1.0 / img.size[0] * img.size[1])

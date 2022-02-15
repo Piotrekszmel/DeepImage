@@ -11,7 +11,7 @@ def predict(Config: dict) -> None:
     model_dict = torch.load(Config["model"])
     model_dict_clone = model_dict.copy()
     for key, _ in model_dict_clone.items():
-        if key.endswith(('running_mean', 'running_var')):
+        if key.endswith(("running_mean", "running_var")):
             del model_dict[key]
     style_model.load_state_dict(model_dict, False)
     style_model.eval()

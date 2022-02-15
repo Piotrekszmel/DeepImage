@@ -147,8 +147,8 @@ class Inspiration(nn.Module):
         return torch.bmm(self.P.transpose(1,2).expand(X.size(0), self.C, self.C), X.view(X.size(0),X.size(1),-1)).view_as(X)
 
     def __repr__(self) -> None:
-        return self.__class__.__name__ + '(' \
-            + 'N x ' + str(self.C) + ')'
+        return self.__class__.__name__ + "(" \
+            + "N x " + str(self.C) + ")"
 
 
 class Net(nn.Module):

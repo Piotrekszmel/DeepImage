@@ -27,7 +27,6 @@ def predict(Config: dict) -> None:
         if "new_height" in Config and "new_width" in Config:
             pred_img = cv2.resize(pred_img, (Config["new_width"], Config["new_height"]), interpolation = cv2.INTER_AREA)
     cv2.imwrite(Config["output_image"], pred_img)
-    cv2.destroyAllWindows()
 
 
 def make_photo(save_path: str) -> bool:

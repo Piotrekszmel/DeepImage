@@ -1,5 +1,5 @@
 import os
-from core.style_transfer.net import Net
+from deepimage.core.style_transfer.net import Net
 import cv2
 import numpy as np
 import torch

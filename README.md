@@ -29,7 +29,7 @@ Build the app and run it on the 0.0.0.0:5000 port.
 
 ## Second way
 
-1. Use Docker
+1. Run the script that will start the docker container
 
     ```bash
     bash start.sh

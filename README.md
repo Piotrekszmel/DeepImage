@@ -24,5 +24,5 @@ Deep Learning Image transformation API. For now only neural style transfer is im
     ```
 
 Examples:
-<img src ="images/1.jpg" width="260px" />
-<img src ="images/2.jpg" width="260px" />
+<img src ="images/input1.jpg" width="260px" />
+<img src ="images/output1.jpg" width="260px" />

@@ -7,7 +7,7 @@ from PIL import Image
 
 
 class StyleLoader:
-    def __init__(self, style_folder: str, style_size: int) -> None:
+    def __init__(self, style_folder: str, style_size: int = 512) -> None:
         self.folder = style_folder
         self.style_size = style_size
         self.files = sorted(os.listdir(style_folder), key=str.casefold)
@@ -18,9 +18,6 @@ class StyleLoader:
         style = tensor_load_rgbimage(filepath, self.style_size)    
         style = style.unsqueeze(0)
         return preprocess_batch(style)
-
-    def size(self) -> int:
-        return len(self.files)
 
 
 def predict_image(img: np.ndarray,
@@ -62,3 +59,15 @@ def preprocess_batch(batch: torch.Tensor) -> torch.Tensor:
     (r, g, b) = torch.chunk(batch, 3)
     batch = torch.cat((b, g, r))
     return batch.transpose(0, 1)
+
+
+def load_model(ngf: int, model_dict_path: str) -> Net:
+    style_model = Net(ngf=ngf)
+    model_dict = torch.load(model_dict_path)
+    model_dict_clone = model_dict.copy()
+    for key, _ in model_dict_clone.items():
+        if key.endswith(("running_mean", "running_var")):
+            del model_dict[key]
+    style_model.load_state_dict(model_dict, False)
+    style_model.eval()
+    return style_model

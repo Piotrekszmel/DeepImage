@@ -26,17 +26,28 @@ class Bottleneck(nn.Module):
         self.expansion = 4
         self.downsample = downsample
         if self.downsample is not None:
-            self.residual_layer = nn.Conv2d(inplanes, planes * self.expansion,
-                                                        kernel_size=1, stride=stride)
+            self.residual_layer = nn.Conv2d(inplanes,
+                                            planes * self.expansion,
+                                            kernel_size=1,
+                                            stride=stride)
         conv_block = [norm_layer(inplanes),
                       nn.ReLU(inplace=True),
-                      nn.Conv2d(inplanes, planes, kernel_size=1, stride=1)]
+                      nn.Conv2d(inplanes,
+                                planes,
+                                kernel_size=1,
+                                stride=1)]
         conv_block += [norm_layer(planes),
                        nn.ReLU(inplace=True),
-                       ConvLayer(planes, planes, kernel_size=3, stride=stride)]
+                       ConvLayer(planes,
+                                 planes,
+                                 kernel_size=3,
+                                 stride=stride)]
         conv_block += [norm_layer(planes),
                        nn.ReLU(inplace=True),
-                       nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1)]
+                       nn.Conv2d(planes,
+                                 planes * self.expansion,
+                                 kernel_size=1,
+                                 stride=1)]
         self.conv_block = nn.Sequential(*conv_block)
         
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -59,14 +70,24 @@ class UpBottleneck(nn.Module):
                  norm_layer: type = nn.BatchNorm2d) -> None:
         super(UpBottleneck, self).__init__()
         self.expansion = 4
-        self.residual_layer = UpsampleConvLayer(inplanes, planes * self.expansion,
-                                                      kernel_size=1, stride=1, upsample=stride)
+        self.residual_layer = UpsampleConvLayer(inplanes,
+                                                planes * self.expansion,
+                                                kernel_size=1,
+                                                stride=1,
+                                                upsample=stride)
         conv_block = [norm_layer(inplanes),
                       nn.ReLU(inplace=True),
-                      nn.Conv2d(inplanes, planes, kernel_size=1, stride=1)]
+                      nn.Conv2d(inplanes,
+                                planes,
+                                kernel_size=1,
+                                stride=1)]
         conv_block += [norm_layer(planes),
                        nn.ReLU(inplace=True),
-                       UpsampleConvLayer(planes, planes, kernel_size=3, stride=1, upsample=stride)]
+                       UpsampleConvLayer(planes,
+                                         planes,
+                                         kernel_size=3,
+                                         stride=1,
+                                         upsample=stride)]
         conv_block += [norm_layer(planes),
                        nn.ReLU(inplace=True),
                        nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1)]
@@ -85,7 +106,10 @@ class ConvLayer(torch.nn.Module):
         super(ConvLayer, self).__init__()
         reflection_padding = int(np.floor(kernel_size / 2))
         self.reflection_pad = nn.ReflectionPad2d(reflection_padding)
-        self.conv2d = nn.Conv2d(in_channels, out_channels, kernel_size, stride)
+        self.conv2d = nn.Conv2d(in_channels,
+                                out_channels,
+                                kernel_size,
+                                stride)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         out = self.reflection_pad(x)
@@ -110,7 +134,10 @@ class UpsampleConvLayer(torch.nn.Module):
         self.reflection_padding = int(np.floor(kernel_size / 2))
         if self.reflection_padding != 0:
             self.reflection_pad = nn.ReflectionPad2d(self.reflection_padding)
-        self.conv2d = nn.Conv2d(in_channels, out_channels, kernel_size, stride)
+        self.conv2d = nn.Conv2d(in_channels,
+                                out_channels,
+                                kernel_size,
+                                stride)
 
     def forward(self, x):
         if self.upsample:
@@ -128,7 +155,8 @@ class Inspiration(nn.Module):
     def __init__(self, C: int, B: int = 1) -> None:
         super(Inspiration, self).__init__()
         # B is equal to 1 or input mini_batch
-        self.weight = nn.Parameter(torch.Tensor(1,C,C), requires_grad=True)
+        self.weight = nn.Parameter(torch.Tensor(1,C,C),
+                                   requires_grad=True)
         # non-parameter buffer
         self.G = torch.Tensor(B,C,C)
         self.G.requires_grad = True
@@ -144,7 +172,9 @@ class Inspiration(nn.Module):
     def forward(self, X: torch.Tensor) -> torch.Tensor:
         # input X is a 3D feature map
         self.P = torch.bmm(self.weight.expand_as(self.G),self.G)
-        return torch.bmm(self.P.transpose(1,2).expand(X.size(0), self.C, self.C), X.view(X.size(0),X.size(1),-1)).view_as(X)
+        return torch.bmm(self.P.transpose(1,2).expand(X.size(0),self.C, self.C),
+                         X.view(X.size(0),
+                         X.size(1),-1)).view_as(X)
 
     def __repr__(self) -> None:
         return self.__class__.__name__ + "(" \
@@ -155,11 +185,10 @@ class Net(nn.Module):
     def __init__(self,
                  input_nc: int = 3,
                  output_nc: int = 3,
-                 ngf: int = 64, norm_layer: type = nn.InstanceNorm2d,
-                 n_blocks: int = 6,
-                 gpu_ids: list = []) -> None:
+                 ngf: int = 64,
+                 norm_layer: type = nn.InstanceNorm2d,
+                 n_blocks: int = 6) -> None:
         super(Net, self).__init__()
-        self.gpu_ids = gpu_ids
         self.gram = GramMatrix()
 
         block = Bottleneck
